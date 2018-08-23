@@ -1,0 +1,99 @@
+function [] = Exercise3_nubs( gesture_data, Clusters_number )
+
+
+current_means=zeros(Clusters_number,3);
+if(Clusters_number >7 )
+    return ;    
+end 
+
+%Mean of first cluster, classMatrix has value 1 for all points
+
+current_means(1,:)=[mean2(gesture_data(:,:,1)), mean2(gesture_data(:,:,2)), mean2(gesture_data(:,:,3))];
+classMatrix=ones(size(gesture_data,1),size(gesture_data,2));
+currentNumberOfClasses= 1 ;
+
+distortionMatrix=calculateDistortion(gesture_data,current_means,classMatrix,currentNumberOfClasses);
+
+
+for i=1:Clusters_number-1
+   [r,c]= find (distortionMatrix == max(distortionMatrix));
+   class_highest_distortion=r;
+   [classMatrix]=  binaryDivisionOfClass(class_highest_distortion,classMatrix,gesture_data,current_means,currentNumberOfClasses);
+   currentNumberOfClasses=currentNumberOfClasses+1 ;
+   %Calculate new means
+   current_means= updateMeans(classMatrix,currentNumberOfClasses,gesture_data) ;
+   
+   distortionMatrix=calculateDistortion(gesture_data,current_means,classMatrix,currentNumberOfClasses);
+   %drawPlots(classMatrix,currentNumberOfClasses,gesture_data);
+end
+
+drawPlots(classMatrix,currentNumberOfClasses,gesture_data);
+
+
+end 
+
+
+
+
+function[distortionMatrix]= calculateDistortion(gesture_data,current_means,classMatrix,currentNumberOfClasses)
+
+distortionMatrix=zeros(size(current_means,1),1);
+for k=1:currentNumberOfClasses  
+    [rows,columns] = find(classMatrix == k);
+    X=[] ;Y=[] ; Z=[] ;
+    for i=1:size(rows)
+       X=[X;gesture_data(rows(i),columns(i),1)];
+       Y=[Y;gesture_data(rows(i),columns(i),2)];
+       Z=[Z;gesture_data(rows(i),columns(i),3)];           
+    end
+    val=0 ;
+    data=[X-current_means(k,1),Y-current_means(k,2),Z-current_means(k,3)];
+    for j=1:size(rows)
+        val=val+sqrt(data(j,1)*data(j,1)+data(j,2)*data(j,2)+data(j,3)*data(j,3)) ;
+    end 
+   distortionMatrix(k,1)=val/size(rows,1) ;
+end 
+        
+end   
+    
+function[]= drawPlots(classMatrix,Clusters_number,data)
+     figure ;
+     colors=['b','k', 'r', 'g', 'm' 'y','c'];
+            
+    for i=1:Clusters_number
+            [r,c]= find(classMatrix ==i); 
+             X=[] ; Y=[] ; Z=[] ;
+            for k=1:size(r,1)
+                X=[X;data(r(k),c(k),1)];
+                Y=[Y;data(r(k),c(k),2)];
+                Z=[Z;data(r(k),c(k),3)];
+            end 
+            
+             scatter(X,Y,colors(i)); hold on ;      
+    end
+end 
+
+
+
+function [New_Means]= updateMeans(classMatrix,Clusters_number,gestures_Data)      
+    for k=1:Clusters_number
+       [rows,columns]= find(classMatrix == k); %positons with ith cluster ;
+       if(size(rows,1) == 0)
+           continue ;
+       end 
+       X=[] ; Y=[] ;Z=[] ;
+       for i=1:size(rows,1)
+         X= [X;gestures_Data(rows(i),columns(i),1)];
+         Y=[Y; gestures_Data(rows(i),columns(i),2)];
+         Z=[Z;gestures_Data(rows(i),columns(i),3)];  
+       end 
+         New_Means(k,1)=mean(X) ;
+         New_Means(k,2)=mean(Y);
+         New_Means(k,3)=mean(Z);
+      
+    end
+
+end 
+ 
+
+
