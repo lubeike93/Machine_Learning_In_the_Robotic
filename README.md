@@ -3,7 +3,9 @@
 Practical Part of the course Machine Learning in the Robotics
 
 <h1><center> Information Retrieval in High-Dimensional Data - Assignment 2</center></h1>
- \textbf{This text is only bold but \emph{this} was also italics}
+
+
+\textbf{This text is only bold but \emph{this} was also italics}
 
 
 Course Description:
